@@ -27,6 +27,10 @@ async def send_random_colour():
 
 @app.post("/get-colour")
 async def get_colour(data: ColorData):
+    rgb_value = data.colour[4:-2].split(",")
+    tup = ()
+    for val in rgb_value:
+        tup += (int(val.strip()),)
     return {"received_color": data.colour}
 
 
