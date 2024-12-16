@@ -2,10 +2,11 @@ from fastapi import FastAPI
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
-from backend.recommender import random_rgb_generator
+from backend.recommender import Recommender
 import uvicorn
 
 app = FastAPI()
+recommender = Recommender()
 app.mount("/static", StaticFiles(directory="frontend"), name="static")
 
 
@@ -21,16 +22,22 @@ async def get_index():
 
 @app.get("/random-colour")
 async def send_random_colour():
-    colour = random_rgb_generator()
+    colour = recommender.get_colour()
     return {"colour": colour}
 
 
 @app.post("/get-colour")
-async def get_colour(data: ColorData):
+async def get_button_colour(data: ColorData):
     rgb_value = data.colour[4:-2].split(",")
-    tup = ()
+    lst = []
     for val in rgb_value:
-        tup += (int(val.strip()),)
+        val = val.strip()
+        if not val:
+            lst.append(0)
+        else:
+            lst.append(int(val),)
+    recommender.chosen_colours.append(lst)
+
     return {"received_color": data.colour}
 
 
