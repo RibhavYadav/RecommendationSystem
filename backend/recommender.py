@@ -1,10 +1,16 @@
 import random
 from typing import List, Tuple
+from pydantic import BaseModel
+
+
+class ColorData(BaseModel):
+    colour: str
 
 
 class Recommender:
     def __init__(self):
         self.chosen_colours: List[Tuple[int, int, int]] = []
+        self.saved_colours: List[Tuple[int, int, int]] = []
 
     def get_colour(self) -> str:
         if len(self.chosen_colours) < 3:
@@ -28,3 +34,14 @@ class Recommender:
     def hex_to_rgb(self, hex_value: str) -> Tuple[int, int, int]:
         hex_value = hex_value.lstrip('#')
         return tuple(int(hex_value[i:i + 2], 16) for i in (0, 2, 4))
+
+    def parse_colour_data(self, data: ColorData):
+        rgb_value = data.colour[4:-2].split(",")
+        lst = []
+        for val in rgb_value:
+            val = val.strip()
+            if not val:
+                lst.append(0)
+            else:
+                lst.append(int(val), )
+        return lst
