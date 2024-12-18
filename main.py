@@ -1,17 +1,12 @@
 from fastapi import FastAPI
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
-from pydantic import BaseModel
-from backend.recommender import Recommender
+from backend.recommender import Recommender, ColorData
 import uvicorn
 
 app = FastAPI()
 recommender = Recommender()
 app.mount("/static", StaticFiles(directory="frontend"), name="static")
-
-
-class ColorData(BaseModel):
-    colour: str
 
 
 @app.get("/", response_class=HTMLResponse)
@@ -28,16 +23,15 @@ async def send_random_colour():
 
 @app.post("/get-colour")
 async def get_button_colour(data: ColorData):
-    rgb_value = data.colour[4:-2].split(",")
-    lst = []
-    for val in rgb_value:
-        val = val.strip()
-        if not val:
-            lst.append(0)
-        else:
-            lst.append(int(val),)
-    recommender.chosen_colours.append(lst)
+    colour = recommender.parse_colour_data(data)
+    recommender.chosen_colours.append(colour)
+    return {"received_color": data.colour}
 
+
+@app.post("/save-colour")
+async def save_colour(data: ColorData):
+    colour = recommender.parse_colour_data(data)
+    recommender.saved_colours.append(colour)
     return {"received_color": data.colour}
 
 
